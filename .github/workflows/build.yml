@@ -4,8 +4,6 @@
 name: KinoDev.Shared Build and Publish NuGet Package to GitHub Packages
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -26,14 +24,3 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-      
-    - name: Pack NuGet package
-      run: dotnet pack KinoDev.Shared.csproj --configuration Release --no-build --output ./nupkg
-
-    - name: Publish NuGet package to GitHub Packages
-      env:
-        GITHUB_TOKEN: ${{ secrets.PACKAGE_KEY }}
-      run: |
-        dotnet nuget push ./nupkg/*.nupkg \
-          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-          --api-key $GITHUB_TOKEN     
