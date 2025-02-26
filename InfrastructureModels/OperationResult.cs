@@ -1,7 +1,6 @@
 ﻿namespace KinoDev.Shared.InfrastructureModels
 {
     public class OperationResult<TResult, TErrorEnum>
-        where TResult : class
         where TErrorEnum : Enum
     {
         public TResult Result { get; set; }
