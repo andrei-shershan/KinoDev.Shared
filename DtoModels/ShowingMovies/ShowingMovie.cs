@@ -14,6 +14,6 @@ namespace KinoDev.Shared.DtoModels.ShowingMovies
 
     public string Url { get; set; }
 
-    public IEnumerable<MovieShowTimeDetails> MovieShowTimeDetails { get; set; }
+    public IEnumerable<MovieShowTimeDetails> MoviesShowTimeDetails { get; set; }
   }
 }

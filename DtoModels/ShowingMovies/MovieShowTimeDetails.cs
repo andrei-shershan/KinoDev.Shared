@@ -2,6 +2,8 @@ namespace KinoDev.Shared.DtoModels.ShowingMovies
 {
   public class MovieShowTimeDetails
   {
+    public int Id { get; set; }
+    
     public int HallId { get; set; }
 
     public string HallName { get; set; }
