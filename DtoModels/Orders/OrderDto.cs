@@ -5,7 +5,7 @@ namespace KinoDev.Shared.DtoModels.Orders
 {
     public class OrderDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public decimal Cost { get; set; }
 
