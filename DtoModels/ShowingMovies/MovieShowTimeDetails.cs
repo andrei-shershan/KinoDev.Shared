@@ -1,17 +1,17 @@
 namespace KinoDev.Shared.DtoModels.ShowingMovies
 {
-  public class MovieShowTimeDetails
-  {
-    public int Id { get; set; }
-    
-    public int HallId { get; set; }
+    public class MovieShowTimeDetails
+    {
+        public int Id { get; set; }
 
-    public string HallName { get; set; }
+        public int HallId { get; set; }
 
-    public DateTime Time { get; set; }
+        public string HallName { get; set; }
 
-    public decimal Price { get; set; }
+        public DateTime Time { get; set; }
 
-    public bool IsSellingAvailable { get; set; }
-  }
+        public decimal Price { get; set; }
+
+        public bool IsSellingAvailable { get; set; }
+    }
 }

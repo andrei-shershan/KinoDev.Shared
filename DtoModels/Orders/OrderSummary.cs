@@ -1,9 +1,10 @@
+using KinoDev.Shared.DtoModels.ShowTimes;
 using KinoDev.Shared.DtoModels.Tickets;
 using KinoDev.Shared.Enums;
 
 namespace KinoDev.Shared.DtoModels.Orders
 {
-    public class OrderDto
+    public class OrderSummary
     {
         public Guid Id { get; set; }
 
@@ -15,6 +16,8 @@ namespace KinoDev.Shared.DtoModels.Orders
 
         public DateTime? CompletedAt { get; set; }
 
-        public ICollection<TicketDto> Ticket { get; set; } = new List<TicketDto>();
+        public ShowTimeSummary ShowTimeSummary { get; set; }
+
+        public ICollection<TickerSummary> Tickets { get; set; }
     }
 }
