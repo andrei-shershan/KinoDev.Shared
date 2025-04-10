@@ -8,7 +8,11 @@ namespace KinoDev.Shared.DtoModels.Orders
     {
         public Guid Id { get; set; }
 
+        public OrderState State { get; set; }
+
         public decimal Cost { get; set; }
+
+        public DateTime CreatedAt { get; set; }
 
         public DateTime? CompletedAt { get; set; }
 
