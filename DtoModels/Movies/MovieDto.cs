@@ -1,4 +1,4 @@
-﻿namespace KinoDev.Shared.DtoModels
+﻿namespace KinoDev.Shared.DtoModels.Movies
 {
     public class MovieDto
     {
