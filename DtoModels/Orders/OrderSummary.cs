@@ -16,6 +16,12 @@ namespace KinoDev.Shared.DtoModels.Orders
 
         public DateTime? CompletedAt { get; set; }
 
+        public Guid? UserId { get; set; }
+
+        public string Email { get; set; }
+
+        public string HashCode { get; set; }
+
         public ShowTimeSummary ShowTimeSummary { get; set; }
 
         public ICollection<TickerSummary> Tickets { get; set; }
