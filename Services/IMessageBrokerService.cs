@@ -4,6 +4,6 @@ namespace KinoDev.Shared.Services
     {
         Task PublishAsync(object data, string subscription, string key = "");
 
-        Task SubscribeAsync(string subscription, Func<string, Task> callback, string key = "");
+        Task SubscribeAsync(string subscription, string queueName, Func<string, Task> callback, string key = "");
     } 
 }

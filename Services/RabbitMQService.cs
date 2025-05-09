@@ -24,7 +24,6 @@ namespace KinoDev.Shared.Services
 
         public async Task PublishAsync(object data, string subscription, string key = "")
         {
-            _logger.LogInformation("Settings: {Settings}", _settings);
             await ValdiateConnectionState(subscription);
 
             var message = System.Text.Json.JsonSerializer.Serialize(data);
@@ -101,7 +100,6 @@ namespace KinoDev.Shared.Services
 
             if (validateExchange)
             {
-                _logger.LogInformation("Declaring exchange: ExchangeDeclareAsync: {Exchange}", exchange);
                 // TODO: Move to separate method as we can have multiple exchanges in the future
                 await _channel.ExchangeDeclareAsync(
                     exchange: exchange,
@@ -113,15 +111,15 @@ namespace KinoDev.Shared.Services
             }
         }
 
-        public async Task SubscribeAsync(string subscription, Func<string, Task> callback, string key = "")
+        public async Task SubscribeAsync(string subscription, string queueName, Func<string, Task> callback, string key = "")
         {
             await ValdiateConnectionState(subscription);
 
-            var queue = await _channel.QueueDeclareAsync("gateway-queue-q");
+            var queue = await _channel.QueueDeclareAsync(queueName);
             await _channel.QueueBindAsync(
                 queue: queue,
-                exchange: "order-completed",
-                routingKey: ""
+                exchange: subscription,
+                routingKey: key
             );
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
