@@ -20,7 +20,7 @@ namespace KinoDev.Shared.DtoModels.Orders
 
         public string Email { get; set; }
 
-        public string HashCode { get; set; }
+        public bool EmailSent { get; set; }
 
         public ShowTimeSummary ShowTimeSummary { get; set; }
 
