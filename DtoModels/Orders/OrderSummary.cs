@@ -1,4 +1,3 @@
-using KinoDev.Shared.DtoModels.OrderFiles;
 using KinoDev.Shared.DtoModels.ShowTimes;
 using KinoDev.Shared.DtoModels.Tickets;
 using KinoDev.Shared.Enums;
@@ -22,6 +21,8 @@ namespace KinoDev.Shared.DtoModels.Orders
         public string Email { get; set; }
 
         public bool EmailSent { get; set; }
+
+        public string FileUrl { get; set; }
 
         public ShowTimeSummary ShowTimeSummary { get; set; }
 
