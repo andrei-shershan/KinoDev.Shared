@@ -4,11 +4,24 @@ namespace KinoDev.Shared.Tests.Helpers
     using KinoDev.Shared.Helpers;
     using Xunit;
 
+
+
     public class HashHelperTests
     {
+
+        public class Point
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+
+            public string Name { get; set; }
+        }
+
         [Fact]
         public void CalculateSha256Hash_WithValidInput_ReturnsConsistentHash()
         {
+
+
             // Arrange
             string input = "password123";
             string salt = "user@example.com";
@@ -89,7 +102,8 @@ namespace KinoDev.Shared.Tests.Helpers
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => HashHelper.CalculateSha256Hash(input, salt));
-        }        [Fact]
+        }
+        [Fact]
         public void CalculateSha256Hash_KnownValue_ReturnsExpectedHash()
         {
             // Arrange

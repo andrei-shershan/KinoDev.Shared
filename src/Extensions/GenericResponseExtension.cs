@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace KinoDev.Shared.Extensions
 {
@@ -18,7 +18,7 @@ namespace KinoDev.Shared.Extensions
                 try
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<T>(content);
+                    return JsonConvert.DeserializeObject<T>(content);
                 }
                 catch (Exception e)
                 {
