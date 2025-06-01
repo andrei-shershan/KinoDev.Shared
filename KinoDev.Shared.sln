@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35219.272
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinoDev.Shared", "KinoDev.Shared.csproj", "{529D40A1-EEDA-4180-B80C-51F7D7F9B16B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B94894AA-BABB-45EF-A6FD-8F0FDBDE07DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KinoDev.Shared", "src\KinoDev.Shared.csproj", "{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinoDev.Shared.Tests", "tests\KinoDev.Shared.Tests\KinoDev.Shared.Tests.csproj", "{2F63075C-8D6C-4C37-B420-88E91884AB8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +15,20 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{529D40A1-EEDA-4180-B80C-51F7D7F9B16B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{529D40A1-EEDA-4180-B80C-51F7D7F9B16B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{529D40A1-EEDA-4180-B80C-51F7D7F9B16B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{529D40A1-EEDA-4180-B80C-51F7D7F9B16B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F63075C-8D6C-4C37-B420-88E91884AB8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F63075C-8D6C-4C37-B420-88E91884AB8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F63075C-8D6C-4C37-B420-88E91884AB8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F63075C-8D6C-4C37-B420-88E91884AB8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E2DEEA0A-B855-4A2F-B11E-3984FAC80B65} = {B94894AA-BABB-45EF-A6FD-8F0FDBDE07DE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {27774729-273D-4A6C-A10E-497CB8182CD6}
