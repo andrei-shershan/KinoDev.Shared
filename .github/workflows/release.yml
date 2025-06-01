@@ -23,7 +23,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --configuration Release --verbosity normal
       
     - name: Pack NuGet package
       run: dotnet pack src/KinoDev.Shared.csproj --configuration Release --no-build --output ./nupkg
