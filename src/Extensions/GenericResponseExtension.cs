@@ -18,6 +18,11 @@ namespace KinoDev.Shared.Extensions
                 try
                 {
                     var content = await response.Content.ReadAsStringAsync();
+                    if (typeof(T) == typeof(string))
+                    {
+                        return content as T;
+                    }
+
                     return JsonConvert.DeserializeObject<T>(content);
                 }
                 catch (Exception e)
