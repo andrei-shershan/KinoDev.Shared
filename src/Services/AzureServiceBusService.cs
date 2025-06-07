@@ -11,7 +11,6 @@ namespace KinoDev.Shared.Services
     {
         private readonly AzureServiceBusSettings _settings;
         private readonly ILogger<AzureServiceBusService> _logger;
-
         private readonly string _connectionString;
         private ServiceBusClient? _client;
 
@@ -26,39 +25,6 @@ namespace KinoDev.Shared.Services
             EnsureClient();
             await using var sender = _client!.CreateSender(queueName);
             await sender.SendMessageAsync(new ServiceBusMessage(message));
-        }
-
-        public async Task SubscribeAsync(string queueName, Func<string, Task> callback)
-        {
-            EnsureClient();
-
-            await using var receiver = _client!.CreateReceiver(queueName);
-
-            var message = await receiver.ReceiveMessageAsync();
-            if (message != null)
-            {
-                await receiver.CompleteMessageAsync(message);
-            }
-
-            await callback(message?.Body?.ToString());
-        }
-
-        private void EnsureClient()
-        {
-            if (_client == null || _client.IsClosed)
-            {
-                _client = new ServiceBusClient(_connectionString);
-            }
-        }
-
-        public Task PublishAsync(object data, string subscription, string key = "")
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task SubscribeAsync(string subscription, string queueName, Func<string, Task> callback, string key = "")
-        {
-            throw new NotImplementedException();
         }
 
         public Task SendMessageAsync(string queueName, object data)
@@ -82,6 +48,14 @@ namespace KinoDev.Shared.Services
             var data = JsonSerializer.Deserialize<T>(message.Body.ToString());
 
             await callback(data);
+        }
+
+        private void EnsureClient()
+        {
+            if (_client == null || _client.IsClosed)
+            {
+                _client = new ServiceBusClient(_connectionString);
+            }
         }
     }
 }
