@@ -154,37 +154,22 @@ namespace KinoDev.Shared.Services
             );
         }
 
-        public async Task<string> ReceiveMessageAsync(string queueName, CancellationToken cancellationToken = default)
+        public async Task SubscribeAsync(string queueName, Func<string, Task> callback)
         {
             await EnsureConnection(queueName);
 
             await _channel.QueueDeclareAsync(queue: queueName, durable: false, exclusive: false, autoDelete: false);
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
-            var tcs = new TaskCompletionSource<string?>();
 
             consumer.ReceivedAsync += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                tcs.TrySetResult(message);
+                await callback(message);           
             };
 
             await _channel.BasicConsumeAsync(queue: queueName, autoAck: true, consumer: consumer);
-
-            cancellationToken.Register(() => tcs.TrySetCanceled());
-
-            using (cancellationToken.Register(() => tcs.TrySetCanceled()))
-            {
-                try
-                {
-                    return await tcs.Task.ConfigureAwait(false);
-                }
-                catch (TaskCanceledException)
-                {
-                    return null;
-                }
-            }
         }
 
         private async Task EnsureConnection(string exchange)

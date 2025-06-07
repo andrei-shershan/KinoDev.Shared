@@ -8,6 +8,6 @@ namespace KinoDev.Shared.Services.Abstractions
 
         Task SendMessageAsync(string queueName, string message);
 
-        Task<string> ReceiveMessageAsync(string queueName, CancellationToken cancellationToken = default);
+        Task SubscribeAsync(string queueName, Func<string, Task> callback);
     } 
 }
