@@ -1,4 +1,6 @@
+using System.Text;
 using KinoDev.Shared.Models;
+using KinoDev.Shared.Services.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -27,7 +29,7 @@ namespace KinoDev.Shared.Services
             await ValdiateConnectionState(subscription);
 
             var message = System.Text.Json.JsonSerializer.Serialize(data);
-            var body = System.Text.Encoding.UTF8.GetBytes(message);
+            var body = Encoding.UTF8.GetBytes(message);
 
             await _channel.BasicPublishAsync(
                 subscription,
@@ -127,7 +129,7 @@ namespace KinoDev.Shared.Services
             consumer.ReceivedAsync += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
-                var message = System.Text.Encoding.UTF8.GetString(body);
+                var message = Encoding.UTF8.GetString(body);
                 await callback(message);
             };
 
@@ -136,6 +138,73 @@ namespace KinoDev.Shared.Services
                 autoAck: true,
                 consumer: consumer
             );
+        }
+
+        public async Task SendMessageAsync(string queueName, string message)
+        {
+            await EnsureConnection(queueName);
+
+            await _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            var body = Encoding.UTF8.GetBytes(message);
+            await _channel.BasicPublishAsync(
+                exchange: string.Empty,
+                routingKey: queueName,
+                mandatory: false,
+                body: body
+            );
+        }
+
+        public async Task<string> ReceiveMessageAsync(string queueName, CancellationToken cancellationToken = default)
+        {
+            await EnsureConnection(queueName);
+
+            await _channel.QueueDeclareAsync(queue: queueName, durable: false, exclusive: false, autoDelete: false);
+
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            var tcs = new TaskCompletionSource<string?>();
+
+            consumer.ReceivedAsync += async (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                tcs.TrySetResult(message);
+            };
+
+            await _channel.BasicConsumeAsync(queue: queueName, autoAck: true, consumer: consumer);
+
+            cancellationToken.Register(() => tcs.TrySetCanceled());
+
+            using (cancellationToken.Register(() => tcs.TrySetCanceled()))
+            {
+                try
+                {
+                    return await tcs.Task.ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                    return null;
+                }
+            }
+        }
+
+        private async Task EnsureConnection(string exchange)
+        {
+            if (!_connection.IsOpen || !_channel.IsOpen)
+            {
+                _connection.Dispose();
+                _channel.Dispose();
+
+                var factory = new ConnectionFactory
+                {
+                    HostName = _settings.HostName,
+                    Port = _settings.Port,
+                    UserName = _settings.UserName,
+                    Password = _settings.Password,
+                };
+
+                _connection = await factory.CreateConnectionAsync();
+                _channel = await _connection.CreateChannelAsync();
+            }
         }
     }
 }
