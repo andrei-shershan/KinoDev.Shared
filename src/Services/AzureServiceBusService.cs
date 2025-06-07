@@ -27,20 +27,19 @@ namespace KinoDev.Shared.Services
             await sender.SendMessageAsync(new ServiceBusMessage(message));
         }
 
-        public async Task<string?> ReceiveMessageAsync(string queueName, CancellationToken cancellationToken = default)
+        public async Task SubscribeAsync(string queueName, Func<string, Task> callback)
         {
             EnsureClient();
 
             await using var receiver = _client!.CreateReceiver(queueName);
 
-            var message = await receiver.ReceiveMessageAsync(cancellationToken: cancellationToken);
+            var message = await receiver.ReceiveMessageAsync();
             if (message != null)
             {
-                await receiver.CompleteMessageAsync(message, cancellationToken);
-                return message.Body.ToString();
+                await receiver.CompleteMessageAsync(message);
             }
 
-            return null;
+            await callback(message?.Body?.ToString());
         }
 
         private void EnsureClient()
