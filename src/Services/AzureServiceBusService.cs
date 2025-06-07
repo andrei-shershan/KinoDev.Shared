@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using KinoDev.Shared.Models;
 using KinoDev.Shared.Services.Abstractions;
@@ -58,6 +59,29 @@ namespace KinoDev.Shared.Services
         public Task SubscribeAsync(string subscription, string queueName, Func<string, Task> callback, string key = "")
         {
             throw new NotImplementedException();
+        }
+
+        public Task SendMessageAsync(string queueName, object data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task SubscribeAsync<T>(string queueName, Func<T, Task> callback) where T : class
+        {
+            EnsureClient();
+
+            await using var receiver = _client!.CreateReceiver(queueName);
+
+            var message = await receiver.ReceiveMessageAsync();
+            if (message != null)
+            {
+                await receiver.CompleteMessageAsync(message);
+            }
+
+            // Deserialize the message body to the specified type T
+            var data = JsonSerializer.Deserialize<T>(message.Body.ToString());
+
+            await callback(data);
         }
     }
 }
