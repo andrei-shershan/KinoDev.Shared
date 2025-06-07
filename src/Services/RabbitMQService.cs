@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using KinoDev.Shared.Models;
 using KinoDev.Shared.Services.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -140,11 +141,12 @@ namespace KinoDev.Shared.Services
             );
         }
 
-        public async Task SendMessageAsync(string queueName, string message)
+        public async Task SendMessageAsync(string queueName, object data)
         {
-            await EnsureConnection(queueName);            
+            await EnsureConnection(queueName);
 
             await _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            var message = JsonSerializer.Serialize(data);
             var body = Encoding.UTF8.GetBytes(message);
             await _channel.BasicPublishAsync(
                 exchange: string.Empty,
@@ -166,7 +168,27 @@ namespace KinoDev.Shared.Services
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                await callback(message);           
+                await callback(message);
+            };
+
+            await _channel.BasicConsumeAsync(queue: queueName, autoAck: true, consumer: consumer);
+        }
+
+        public async Task SubscribeAsync<T>(string queueName, Func<T, Task> callback) where T : class
+        {
+            await EnsureConnection(queueName);
+
+            await _channel.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+
+            consumer.ReceivedAsync += async (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+
+                var data = JsonSerializer.Deserialize<T>(message);
+                await callback(data);
             };
 
             await _channel.BasicConsumeAsync(queue: queueName, autoAck: true, consumer: consumer);
@@ -184,7 +206,7 @@ namespace KinoDev.Shared.Services
             {
                 restoreConnection = true;
             }
-            
+
             if (restoreConnection)
             {
                 if (_connection != null)
