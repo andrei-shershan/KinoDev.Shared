@@ -142,7 +142,7 @@ namespace KinoDev.Shared.Services
 
         public async Task SendMessageAsync(string queueName, string message)
         {
-            await EnsureConnection(queueName);
+            await EnsureConnection(queueName);            
 
             await _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
             var body = Encoding.UTF8.GetBytes(message);
@@ -158,7 +158,7 @@ namespace KinoDev.Shared.Services
         {
             await EnsureConnection(queueName);
 
-            await _channel.QueueDeclareAsync(queue: queueName, durable: false, exclusive: false, autoDelete: false);
+            await _channel.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false, autoDelete: false);
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
 
