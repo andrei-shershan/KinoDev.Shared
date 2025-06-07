@@ -189,10 +189,28 @@ namespace KinoDev.Shared.Services
 
         private async Task EnsureConnection(string exchange)
         {
-            if (!_connection.IsOpen || !_channel.IsOpen)
+            var restoreConnection = false;
+
+            if (_connection == null || !_connection.IsOpen)
             {
-                _connection.Dispose();
-                _channel.Dispose();
+                restoreConnection = true;
+            }
+            else if (_channel == null || !_channel.IsOpen)
+            {
+                restoreConnection = true;
+            }
+            
+            if (restoreConnection)
+            {
+                if (_connection != null)
+                {
+                    await _connection.DisposeAsync();
+                }
+
+                if (_channel != null)
+                {
+                    await _channel.DisposeAsync();
+                }
 
                 var factory = new ConnectionFactory
                 {
