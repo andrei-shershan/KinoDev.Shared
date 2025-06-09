@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 using KinoDev.Shared.Models;
 using KinoDev.Shared.Services.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -11,30 +12,34 @@ namespace KinoDev.Shared.Services
     {
         private readonly AzureServiceBusSettings _settings;
         private readonly ILogger<AzureServiceBusService> _logger;
-        private readonly string _connectionString;
         private ServiceBusClient? _client;
+        private readonly ServiceBusAdministrationClient _adminClient;
+
 
         public AzureServiceBusService(IOptions<AzureServiceBusSettings> azureServiceBusOptions, ILogger<AzureServiceBusService> logger)
         {
+
             _settings = azureServiceBusOptions.Value;
+
+            _adminClient = new ServiceBusAdministrationClient(_settings.ConnectionString);
+
             _logger = logger;
         }
 
-        public async Task SendMessageAsync(string queueName, string message)
+        public async Task SendMessageAsync(string queueName, object data)
         {
             EnsureClient();
+            await EnsureQueueExistsAsync(queueName);
             await using var sender = _client!.CreateSender(queueName);
-            await sender.SendMessageAsync(new ServiceBusMessage(message));
-        }
 
-        public Task SendMessageAsync(string queueName, object data)
-        {
-            throw new NotImplementedException();
+            var message = JsonSerializer.Serialize(data);
+            await sender.SendMessageAsync(new ServiceBusMessage(message));
         }
 
         public async Task SubscribeAsync<T>(string queueName, Func<T, Task> callback) where T : class
         {
             EnsureClient();
+            await EnsureQueueExistsAsync(queueName);
 
             await using var receiver = _client!.CreateReceiver(queueName);
 
@@ -54,7 +59,25 @@ namespace KinoDev.Shared.Services
         {
             if (_client == null || _client.IsClosed)
             {
-                _client = new ServiceBusClient(_connectionString);
+                _client = new ServiceBusClient(_settings.ConnectionString);
+            }
+        }
+
+        private async Task EnsureQueueExistsAsync(string queueName)
+        {
+            try
+            {
+                if (!await _adminClient.QueueExistsAsync(queueName))
+                {
+                    _logger.LogInformation("Creating queue: {QueueName}", queueName);
+                    await _adminClient.CreateQueueAsync(queueName);
+                    _logger.LogInformation("Queue created: {QueueName}", queueName);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring queue exists: {QueueName}", queueName);
+                throw;
             }
         }
     }
