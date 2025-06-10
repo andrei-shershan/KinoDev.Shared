@@ -38,21 +38,29 @@ namespace KinoDev.Shared.Services
 
         public async Task SubscribeAsync<T>(string queueName, Func<T, Task> callback) where T : class
         {
-            EnsureClient();
-            await EnsureQueueExistsAsync(queueName);
-
-            await using var receiver = _client!.CreateReceiver(queueName);
-
-            var message = await receiver.ReceiveMessageAsync();
-            if (message != null)
+            try
             {
-                await receiver.CompleteMessageAsync(message);
+                EnsureClient();
+                await EnsureQueueExistsAsync(queueName);
+
+                await using var receiver = _client!.CreateReceiver(queueName);
+
+                var message = await receiver.ReceiveMessageAsync();
+                if (message != null)
+                {
+                    await receiver.CompleteMessageAsync(message);
+                }
+
+                // Deserialize the message body to the specified type T
+                var data = JsonSerializer.Deserialize<T>(message.Body.ToString());
+
+                await callback(data);
             }
-
-            // Deserialize the message body to the specified type T
-            var data = JsonSerializer.Deserialize<T>(message.Body.ToString());
-
-            await callback(data);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error subscribing to queue: {QueueName}", queueName);
+                throw;
+            }
         }
 
         private void EnsureClient()
