@@ -15,10 +15,8 @@ namespace KinoDev.Shared.Services
         private ServiceBusClient? _client;
         private readonly ServiceBusAdministrationClient _adminClient;
 
-
         public AzureServiceBusService(IOptions<AzureServiceBusSettings> azureServiceBusOptions, ILogger<AzureServiceBusService> logger)
         {
-
             _settings = azureServiceBusOptions.Value;
 
             _adminClient = new ServiceBusAdministrationClient(_settings.ConnectionString);
@@ -38,27 +36,47 @@ namespace KinoDev.Shared.Services
 
         public async Task SubscribeAsync<T>(string queueName, Func<T, Task> callback) where T : class
         {
-            try
+              try
             {
                 EnsureClient();
-                await EnsureQueueExistsAsync(queueName);
-
-                await using var receiver = _client!.CreateReceiver(queueName);
-
-                var message = await receiver.ReceiveMessageAsync();
-                if (message != null)
+                await EnsureQueueExistsAsync(queueName);            
+                
+                var processor = _client!.CreateProcessor(queueName, new ServiceBusProcessorOptions
                 {
-                    await receiver.CompleteMessageAsync(message);
-                }
+                    AutoCompleteMessages = false,
+                    MaxConcurrentCalls = 1 // Adjust as needed
+                });
 
-                // Deserialize the message body to the specified type T
-                var data = JsonSerializer.Deserialize<T>(message.Body.ToString());
+                processor.ProcessMessageAsync += async args =>
+                {
+                    try
+                    {
+                        var data = JsonSerializer.Deserialize<T>(args.Message.Body.ToString());
+                        if (data != null)
+                        {
+                            await callback(data);
+                        }
 
-                await callback(data);
+                        await args.CompleteMessageAsync(args.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "Error processing message from queue: {QueueName}", queueName);
+                        await args.AbandonMessageAsync(args.Message);
+                    }
+                };
+
+                processor.ProcessErrorAsync += async args =>
+                {
+                    _logger?.LogError(args.Exception, "Error in message processor for queue: {QueueName}", queueName);
+                    await Task.CompletedTask;
+                };
+
+                await processor.StartProcessingAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error subscribing to queue: {QueueName}", queueName);
+                _logger?.LogError(ex, "Error subscribing to queue: {QueueName}", queueName);
                 throw;
             }
         }
